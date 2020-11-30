@@ -15,5 +15,5 @@ training_index<-sample(1:nrow(cancer_data_new),0.8*nrow(cancer_data_new))
 #glm.fit<-glm(Level~.,data = cancer_data_new[training_index,],family = binomial)
 
 library(foreign)
-library(MASS)
+library(MASS) 
 m<-polr(Level~.,data = cancer_data_new[training_index,])
