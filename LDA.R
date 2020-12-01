@@ -11,4 +11,9 @@ lda.class=lda.pred$class
 ls<-as.list(t(cancer_data_new[-training_index,24]))
 ls2 <- as.data.frame(lapply(ls, unlist))
 table(lda.class,ls2)
-mean((lda.class!=ls)^2)
+mean((lda.class==ls)^2)
+
+#> mean((lda.class!=ls)^2)
+#[1] 0.025
+#> mean((lda.class==ls)^2)
+#[1] 0.975
