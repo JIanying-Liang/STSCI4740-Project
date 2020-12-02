@@ -143,7 +143,7 @@ data_test_category <- df_clean[-ran,25]
 ##load the package class
 library(class)
 ##run knn function
-pr <- knn(data_train,data_test,cl=data_target_category,k=50)
+pr <- knn(data_train,data_test,cl=data_target_category,k=20)
 
 ##create confusion matrix
 tab <- table(pr,data_test_category)
@@ -153,7 +153,7 @@ tab <- table(pr,data_test_category)
 accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
 accuracy(tab)
 
-#In the data, I have run the k-nearest neighbor algorithm that gave me 95.87629% accurate result. 
+#In the data, I have run the k-nearest neighbor algorithm that gave me 96.90722% accurate result. 
 
 #First, I normalized the data to convert the 2nd-24th columns of variables into a standardized 0-to-1 form so that we can fit them into one box (one graph) ;
 #the main objective is to predict whether a level is low, median, or high and that is why I excluded the column 25 and stored it into another variable called data_target_category. 
