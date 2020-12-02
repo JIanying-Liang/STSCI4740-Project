@@ -114,19 +114,6 @@ df_clean <-df_clean[,1:25] # the dataset after dropping outliers
 dim(df_clean)
 ############
 
-# K-Nearest Neighbors
-
-library(class)
-train.X=cbind(Lag1,Lag2)[train,] #X for training data
-test.X=cbind(Lag1,Lag2)[!train,] #X for testing data
-train.Direction=Direction[train] #Y for training data
-set.seed(1) # to ensure the reproducibility of the results, I suggest to set a random seed before the analysis. 
-knn.pred=knn(train.X,test.X,train.Direction,k=1)
-table(knn.pred,Direction.2005)
-(83+43)/252
-knn.pred=knn(train.X,test.X,train.Direction,k=3)
-table(knn.pred,Direction.2005)
-mean(knn.pred==Direction.2005)
 
 #KNN:
 set.seed(1)
