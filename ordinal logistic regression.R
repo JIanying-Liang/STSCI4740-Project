@@ -9,6 +9,7 @@ require(nnet)
 require(ggplot2)
 require(reshape2)
 
+training_index<-sample(1:nrow(cancer_data_model),0.8*nrow(cancer_data_model))
 cancer_data_new$Level<-relevel(cancer_data_new$Level,ref = "Low")
 ml<-multinom(Level~.,data = cancer_data_new,subset = training_index)
 summary(ml)
