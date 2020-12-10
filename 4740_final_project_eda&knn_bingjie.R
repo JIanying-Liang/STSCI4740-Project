@@ -1,9 +1,17 @@
+#install packages:
+
 library(ggplot2)
 install.packages("readxl")
 library("readxl")
+
+#import datafile from excel:
 data <-read_excel("C:/Users/olive/Desktop/4740/cancer_data.xlsx")
 typeof(data)
 df <- data.frame(data)
+
+
+#checking dataframe and its property(such as dimension, Length); 
+#Also seeing imformation of variables in the data(eg:data type,max,min,median,mean):
 head(df)
 
 nrow(df)
@@ -30,9 +38,9 @@ magnitude.counts <- table(df$Level)
 
 #checking missing value:
 sum(is.na(df))
-#no missing value
+#We can see that there is no missing value in the dataset.
 
-
+#
 install.packages("skimr")
 library(skimr)
 skim(df)
