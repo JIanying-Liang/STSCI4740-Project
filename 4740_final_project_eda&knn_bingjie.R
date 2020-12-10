@@ -87,7 +87,7 @@ dplyr::filter(df, Age>70)
 
 boxplot.stats(df$Age)$out
 
-###new add:
+#Then we use Mahalanobis Distance to find the outliers:
 
 colMeans(df[,c(2:24)])
 
@@ -169,6 +169,7 @@ accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
 accuracy(tab)
 
 #In the data, I have run the k-nearest neighbor algorithm that gave me 96.90722% accurate result. 
+#Compared to different values of k, I found that the accuracy 96.90722% is good enough under k value equals to 20.
 
 #First, I normalized the data to convert the 2nd-24th columns of variables into a standardized 0-to-1 form so that we can fit them into one box (one graph) ;
 #the main objective is to predict whether a level is low, median, or high and that is why I excluded the column 25 and stored it into another variable called data_target_category. 
