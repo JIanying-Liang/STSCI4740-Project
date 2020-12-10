@@ -99,7 +99,7 @@ df2=cor(df[,c(2:24)])
 cor(df[,c(2:24)])
 library('caret')
 hc = findCorrelation(df2, cutoff=0.9) # putt any value as a "cutoff" 
-hc = sort(hc)
+hc = sort(hc) #there is no correlation among variables under cutoff=0.9
 reduced_Data = df2[,-c(hc)]
 print (reduced_Data)
 
