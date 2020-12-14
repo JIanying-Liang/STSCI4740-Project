@@ -1,0 +1,43 @@
+---
+title: "Tree"
+author: "Fangfei Lu"
+date: "12/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tree)
+library(randomForest)
+```
+
+## Bagging
+### Training and Test set
+```{r}
+set.seed(1)
+train.index <- sample(1:nrow(cancer_clean),0.8*nrow(cancer_clean))
+tree.train = cancer_clean[train.index,]
+tree.te = cancer_clean[-train.index,]
+```
+
+### Bagging
+```{r}
+set.seed(1)
+bag.cancer = randomForest(Level~., data = tree.train, mtry=23, importance=TRUE)
+pred.bag = predict(bag.cancer, newdata = tree.te)
+mean((pred.bag==tree.te$Level)^2)
+```
+
+### Random Forest
+```{r}
+set.seed(1)
+rf.cancer = randomForest(Level~., data = tree.train, mtry=5, importance=TRUE)
+pred.rf = predict(rf.cancer, newdata = tree.te)
+mean((pred.rf==tree.te$Level)^2)
+```
+
+
+
