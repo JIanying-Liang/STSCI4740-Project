@@ -1,0 +1,146 @@
+---
+title: "Ridge_Lasso"
+author: "Fangfei Lu"
+date: "12/11/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ridge & Lasso
+Here we would like to apply ridge regression and lasso regression methods to test our data model and see whether it has a good prediction. 
+
+```{r packages}
+library(glmnet)
+library(dplyr)
+library(caret)
+require(methods)
+```
+
+## Raw Data
+### Data
+```{r}
+cancer_data = read.csv('D:/AmireuXFaye/Cornell/STSCI4740/cancer_data.csv')
+cancer_data<-cancer_data[,-1]
+cancer_data$Level = as.factor(cancer_data$Level)
+df <- data.frame(cancer_data)
+cancer_data <- data.matrix(cancer_data)
+```
+
+### Correlation
+```{r}
+x <- cor(cancer_data[,c(1:23)])
+
+# Cutoff = 0.9
+findCorrelation(
+  x,
+  cutoff = 0.9,
+  verbose = FALSE,
+  names = FALSE,
+  exact = ncol(x < 100)
+)
+```
+For finding the correlation between all the predictors, we set the cutoff line at 0.9 which means the correlation out of the range of $\pm$0.9 will be considered as having correlation. At this cutoff line, we don't have any correlation in our dataset. 
+
+### Training and Test
+```{r}
+set.seed(1)
+train.index <- sample(1:nrow(cancer_data),0.8*nrow(cancer_data))
+cancer_train <- cancer_data[train.index, 1:23]
+cancer_te <- cancer_data[-train.index, 1:23]
+level_train <- cancer_data[train.index, 24]
+level_te <- cancer_data[-train.index, 24]
+```
+We use 80% of our data as training dataset and 20% of our data as test dataset. 
+
+### Ridge
+```{r}
+set.seed(1)
+cv.out=cv.glmnet(cancer_train,level_train,alpha=0, family = "multinomial") 
+ridge.bestlam=cv.out$lambda.min
+ridge.mod=glmnet(cancer_train,level_train,alpha=0,lambda=ridge.bestlam, family = "multinomial")
+pred.ridge = predict(ridge.mod, s=ridge.bestlam, newx = cancer_te, type="response")
+pred.level = colnames(pred.ridge)[apply(pred.ridge, 1, which.max)]
+mse.ridge = mean((pred.level==level_te)^2)
+mse.ridge
+```
+Since the response variable(level) in our dataset has three levels(1,2,3), we use multinomial distribution to obtain the regression.
+The accuracy of our ridge model is 0.95 which means 95% data in our test dataset fit in our ridge model. 
+
+### Lasso
+```{r}
+set.seed(1)
+cv.out=cv.glmnet(cancer_train,level_train, type.measure = "class", alpha=1, family = "multinomial") 
+lasso.bestlam = cv.out$lambda.min
+lasso.mod = glmnet(cancer_train,level_train, type.measure = "class", alpha=1,lambda=lasso.bestlam, family = "multinomial")
+pred.lasso = predict(lasso.mod, s=lasso.bestlam, newx = cancer_te, type = "response")
+pred.level = colnames(pred.lasso)[apply(pred.lasso, 1, which.max)]
+mse.lasso = mean((pred.level == level_te)^2)
+mse.lasso
+```
+The accuracy of our lasso model is 1 which means 100% data from test dataset fit in our lasso model. 
+
+
+## Cleaned Data Without Outlier
+### Data
+```{r include=FALSE}
+# Potential outliers
+dplyr::filter(df, Age>70)
+MD <- mahalanobis(df[,c(1:23)],colMeans(df[,c(1:23)]),cov(df[,c(1:23)]))
+df$MD <-round(MD,3)
+MD[1:200] %>% round(2)
+
+#Mahalanobis outliers (set to 50)
+df$outlier_maha <- FALSE
+df$outlier_maha[df$MD >50] <- TRUE
+dplyr::filter(df, outlier_maha == TRUE) # outliers
+cancer_clean<- df[-which(df$outlier_maha ==TRUE),]
+dim(cancer_clean)
+cancer_clean <-cancer_clean[,1:24] # cleaned data
+
+```
+
+### Training and Test
+```{r}
+set.seed(1)
+train.index <- sample(1:nrow(cancer_clean),0.8*nrow(cancer_clean))
+cancer_clean_train <- as.matrix(cancer_clean[train.index, 1:23])
+cancer_clean_te <- as.matrix(cancer_clean[-train.index, 1:23])
+level_clean_train <- as.matrix(cancer_clean[train.index, 24])
+level_clean_te <- as.matrix(cancer_clean[-train.index, 24])
+```
+
+### Ridge
+```{r}
+set.seed(1)
+cv.out=cv.glmnet(cancer_clean_train,level_clean_train,alpha=0, family = "multinomial") 
+ridge.bestlam=cv.out$lambda.min
+ridge.mod=glmnet(cancer_clean_train,level_clean_train,alpha=0,lambda=ridge.bestlam, family = "multinomial")
+pred.ridge = predict(ridge.mod, s=ridge.bestlam, newx = cancer_clean_te, type="response")
+pred.level = colnames(pred.ridge)[apply(pred.ridge, 1, which.max)]
+mse.ridge = mean((pred.level==level_clean_te)^2)
+mse.ridge
+```
+The accuracy of our ridge model is 0.9536 which means 95.36% data in our test dataset fit in our ridge model. 
+
+### Lasso
+```{r}
+set.seed(1)
+cv.out=cv.glmnet(cancer_clean_train,level_clean_train, type.measure = "class", alpha=1, family = "multinomial") 
+lasso.bestlam = cv.out$lambda.min
+lasso.mod = glmnet(cancer_clean_train,level_clean_train, type.measure = "class", alpha=1,lambda=lasso.bestlam, family = "multinomial")
+pred.lasso = predict(lasso.mod, s=lasso.bestlam, newx = cancer_clean_te, type = "response")
+pred.level = colnames(pred.lasso)[apply(pred.lasso, 1, which.max)]
+mse.lasso = mean((pred.level == level_clean_te)^2)
+mse.lasso
+```
+The accuracy of our lasso model is 1 which means 100% data from test dataset fit in our lasso model. 
+
+## Conclusion
+Comparing the test error rate between ridge regression model and lasso regression model, we found that the lasso regression model seems to be better. However, the 100% accuracy rate is too high to have to think about overfitting. 
+
+
+
+
